@@ -36,7 +36,8 @@ class InstructionSets {
 // The HH_TARGET_Portable bit is guaranteed to be set.
 #if HH_ARCH_X64
   static TargetBits Supported();
-#elif HH_ARCH_PPC
+// No VSX support on Darwin, incompatible ISA. Notice, !defined(__VSX__) does not work.
+#elif HH_ARCH_PPC && !defined(__APPLE__)
   static HH_INLINE TargetBits Supported() {
     return HH_TARGET_VSX | HH_TARGET_Portable;
   }
@@ -64,7 +65,7 @@ class InstructionSets {
       Func<HH_TARGET_SSE41>()(std::forward<Args>(args)...);
       return HH_TARGET_SSE41;
     }
-#elif HH_ARCH_PPC
+#elif HH_ARCH_PPC && !defined(__APPLE__)
     const TargetBits supported = Supported();
     if (supported & HH_TARGET_VSX) {
       Func<HH_TARGET_VSX>()(std::forward<Args>(args)...);
@@ -96,11 +97,10 @@ class InstructionSets {
     if (supported & HH_TARGET_SSE41) {
       Func<HH_TARGET_SSE41>()(std::forward<Args>(args)...);
     }
-#elif HH_ARCH_PPC
+#elif HH_ARCH_PPC && !defined(__APPLE__)
     if (supported & HH_TARGET_VSX) {
       Func<HH_TARGET_VSX>()(std::forward<Args>(args)...);
     }
-
 #elif HH_ARCH_NEON
     if (supported & HH_TARGET_NEON) {
       Func<HH_TARGET_NEON>()(std::forward<Args>(args)...);

@@ -23,7 +23,7 @@
 #if HH_ARCH_PPC
 #if __GLIBC__
 #include <sys/platform/ppc.h>  // __ppc_get_timebase_freq
-#elif __FreeBSD__
+#elif defined(__FreeBSD__) || defined(__APPLE__)
 // clang-format off
 #include <sys/types.h>
 #include <sys/sysctl.h>                 /* must come after sys/types.h */
@@ -155,6 +155,14 @@ double DetectNominalClockRate() {
   sysctlbyname("dev.cpu.0.freq", &freq, &length, NULL, 0);
   freq *= 1E6;
   return freq;
+#elif defined(__APPLE__)
+  uint64_t freq_hz = 0;
+  size_t length = sizeof(freq_hz);
+  int rc = sysctlbyname("hw.cpufrequency", &freq_hz, &length, NULL, 0);
+  if (rc == 0 && freq_hz > 0)
+    return (double)freq_hz;
+  else
+    return 0.0;
 #endif
 #endif
 
@@ -173,18 +181,30 @@ double InvariantTicksPerSecond() {
 #if HH_ARCH_PPC
 #if __GLIBC__
   static const double cycles_per_second = __ppc_get_timebase_freq();
+  return cycles_per_second;
 #elif __FreeBSD__
   double cycles_per_second = 0;
   size_t length = sizeof(cycles_per_second);
   sysctlbyname("kern.timecounter.tc.timebase.frequency", &cycles_per_second,
                &length, NULL, 0);
+  return cycles_per_second;
 #elif __OpenBSD__
   /* There is currently no method of retrieving this via userland.
    * This value is correct for Power8 and Power9.
    */
   static const double cycles_per_second = 512000000;
-#endif
   return cycles_per_second;
+#elif defined(__APPLE__)
+  uint64_t freq_hz = 0;
+  size_t length = sizeof(freq_hz);
+  int rc = sysctlbyname("hw.cpufrequency", &freq_hz, &length, NULL, 0);
+  if (rc == 0 && freq_hz > 0)
+    return (double)freq_hz;
+  else
+    return 0.0;
+#endif
+  /* fallback */
+  return DetectNominalClockRate();
 #else
   return NominalClockRate();
 #endif

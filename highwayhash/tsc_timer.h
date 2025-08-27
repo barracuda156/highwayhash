@@ -94,7 +94,11 @@ template <>
 inline uint64_t Start<uint64_t>() {
   uint64_t t;
 #if HH_ARCH_PPC
-  asm volatile("mfspr %0, %1" : "=r"(t) : "i"(268));
+  #if defined(__APPLE__)
+    asm volatile("mftb %0" : "=r"(t));
+  #else
+    asm volatile("mfspr %0, %1" : "=r"(t) : "i"(268));
+  #endif
 #elif HH_ARCH_AARCH64
   asm volatile("mrs %0, cntvct_el0" : "=r"(t));
 #elif HH_ARCH_X64 && HH_MSC_VERSION
@@ -125,7 +129,11 @@ template <>
 inline uint64_t Stop<uint64_t>() {
   uint64_t t;
 #if HH_ARCH_PPC
-  asm volatile("mfspr %0, %1" : "=r"(t) : "i"(268));
+  #if defined(__APPLE__)
+    asm volatile("mftb %0" : "=r"(t));
+  #else
+    asm volatile("mfspr %0, %1" : "=r"(t) : "i"(268));
+  #endif
 #elif HH_ARCH_AARCH64
   asm volatile("mrs %0, cntvct_el0" : "=r"(t));
 #elif HH_ARCH_X64 && HH_MSC_VERSION

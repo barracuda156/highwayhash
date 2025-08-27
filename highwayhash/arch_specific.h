@@ -70,7 +70,7 @@ namespace highwayhash {
 #define HH_ARCH_NEON 0
 #endif
 
-#if defined(__powerpc64__) || defined(_M_PPC)
+#if defined(__powerpc__) || defined(__powerpc64__) || defined(__POWERPC__) || defined(_M_PPC)
 #define HH_ARCH_PPC 1
 #else
 #define HH_ARCH_PPC 0
@@ -95,7 +95,7 @@ namespace highwayhash {
 // https://stackoverflow.com/questions/18563978/detect-the-availability-of-sse-sse2-instruction-set-in-visual-studio
 #elif defined(__SSE4_1__) || (HH_MSC_VERSION != 0 && defined(__AVX__))
 #define HH_TARGET_NAME SSE41
-#elif defined(__VSX__)
+#elif defined(__VSX__) && !defined(__APPLE__)
 #define HH_TARGET_NAME VSX
 #elif HH_ARCH_NEON
 #define HH_TARGET_NAME NEON

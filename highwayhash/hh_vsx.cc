@@ -17,6 +17,6 @@
 
 #define HH_TARGET_NAME VSX
 
-#ifdef __VSX__
+#if defined(__VSX__) && !defined(__APPLE__)
 #include "highwayhash/highwayhash_target.cc"
 #endif

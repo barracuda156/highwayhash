@@ -27,7 +27,7 @@
 
 // For auto-dependency generation, we need to include all headers but not their
 // contents
-#ifndef HH_DISABLE_TARGET_SPECIFIC
+#if !defined(HH_DISABLE_TARGET_SPECIFIC) && !defined(__APPLE__)
 
 #include <altivec.h>
 #undef vector
